@@ -1,0 +1,28 @@
+<html>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <div id='vuejs'>
+        <div id="output">
+        </div>
+        <textarea v-model="markData">
+        </textarea>
+    </div>
+    <script>
+        new Vue({
+        el: '#vuejs',
+        data: {
+            markData: ''
+        },
+        watch: {
+            markData() {
+                var md = window.markdownit();
+                var html = md.render(this.markData);
+                $('#output').html(html);
+            }
+        },
+        })
+    </script>
+<body>
+</html>
