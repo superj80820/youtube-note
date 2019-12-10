@@ -1,50 +1,31 @@
-function loadScript(url) {
-    return new Promise(function(resolve, reject) {
-        var script = document.createElement("script");
-        script.onload = resolve;
-        script.onerror = reject;
-        script.src = url;
-        document.head.appendChild(script);
-    });
-}
-
-(async () => {
-    await Promise.all([
-        loadScript('https://unpkg.com/vue'),
-        loadScript('https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'),
-        loadScript('https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js')
-    ])
-    $('#primary-inner #player').after(`<div id='vuejs'>
-    <div id="output">
-    </div>
-    <textarea v-model="markData">
-    </textarea>
-</div>`)
-
-    new Vue({
-    el: '#vuejs',
-    data: {
-        message: '',
-        ytplayer: null,
-        markData: ''
+fetch("https://api.github.com/gists", {
+    "method": "POST",
+    "headers": {
+        "authorization": "token d7f903aa51819b31d0d57412dab8cb4be5cc6469",
+        "content-type": "application/json"
     },
-    watch: {
-        markData() {
-            var md = window.markdownit();
-            var html = md.render(this.markData);
-            $('#output').html(html);
+    "body": {
+        "description": "Hello World Examples",
+        "public": false,
+        "files": {
+            "hello_world.rb": {
+                "content": "class HelloWorld\n   def initialize(name)\n      @name = name.capitalize\n   end\n   def sayHi\n      puts \"Hello !\"\n   end\nend\n\nhello = HelloWorld.new(\"World\")\nhello.sayHi"
+            },
+            "hello_world.py": {
+                "content": "class HelloWorld:\n\n    def __init__(self, name):\n        self.name = name.capitalize()\n       \n    def sayHi(self):\n        print \"Hello \" + self.name + \"!\"\n\nhello = HelloWorld(\"world\")\nhello.sayHi()"
+            },
+            "hello_world_ruby.txt": {
+                "content": "Run `ruby hello_world.rb` to print Hello World"
+            },
+            "hello_world_python.txt": {
+                "content": "Run `python hello_world.py` to print Hello World"
+            }
         }
-    },
-    created() {
-        // this.ytplayer = document.getElementById("movie_player");
-        // this.ytplayer.addEventListener("onStateChange", "onPlayerStateChange");
-        // onPlayerStateChange = (state) => {
-        // if (state === 1){
-        //         console.log(ytplayer)
-        //     this.message = this.ytplayer.getCurrentTime()
-        //     }
-        // };
     }
-    })
-})()
-
+})
+.then(response => {
+console.log(response);
+})
+.catch(err => {
+console.log(err);
+});

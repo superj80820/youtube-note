@@ -1,0 +1,14 @@
+.autoImgSize img {
+    max-width: 100%;
+    height: auto;
+}
+.scroll {
+    width: auto;
+    height: 520px;
+    overflow: scroll;
+    padding:15px 20px;
+}
+.textarea {
+    width: auto;
+    height: 520px;
+}
