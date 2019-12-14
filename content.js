@@ -9,7 +9,6 @@ function insert_main() {
                 s = undefined
                 reslove()
             };
-            // s.onload = reslove; //test
             document.documentElement.appendChild(s)
         })(window.document);
     })
@@ -39,7 +38,7 @@ function formatTime(time) {
             window.document.getElementById("ytControllerInput").innerHTML = '{"type": "pauseVideo"}'
         },
         seekTo(time) {
-            window.document.getElementById("ytControllerInput").innerHTML = '{"type": "seekTo"}'
+            window.document.getElementById("ytControllerInput").innerHTML = `{"type": "seekTo", "value": "${time}"}`
         },
         getTimeKeyLessOrThanCurrentTme(noteObj, lessOrThan) {
             currentTime = this.getCurrentTime()
