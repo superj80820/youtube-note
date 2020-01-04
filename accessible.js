@@ -7,7 +7,6 @@ function loadScript(url) {
         document.head.appendChild(script);
     });
 }
-
 function loadLink(url) {
     return new Promise(function(resolve, reject) {
         const link = document.createElement("link");
@@ -18,7 +17,6 @@ function loadLink(url) {
         document.head.appendChild(link);
     });
 }
-
 function addStyle(css) {
     const head = document.head || document.getElementsByTagName('head')[0], style = document.createElement('style');
     head.appendChild(style);

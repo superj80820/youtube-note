@@ -1,10 +1,13 @@
+
+const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
 function insert_main() {
     return new Promise((reslove, recject) => {
-        (function(document) {
+        (function (document) {
             "use strict";
             var s = document.createElement("script");
             s.src = chrome.extension.getURL("accessible.js");
-            s.onload = function() {
+            s.onload = function () {
                 this.parentNode.removeChild(this);
                 s = undefined
                 reslove()
@@ -23,8 +26,86 @@ function checkInsertVueIdDone() {
 function formatTime(time) {
     return parseInt(time.toString().match(/^(\d+)\.*/)[1])
 }
+function handleClientLoad() {
+    // Load the API's client and auth2 modules.
+    // Call the initClient function after the modules load.
+    gapi.load('client:auth2', initClient);
+}
+function updateSigninStatus(isSignedIn) {
+    setSigninStatus();
+}
+function setSigninStatus(isSignedIn) {
+    var user = GoogleAuth.currentUser.get();
+    var isAuthorized = user.hasGrantedScopes(SCOPE);
+    if (isAuthorized) {
+        $('#sign-in-or-out-button').html('Sign out');
+        $('#revoke-access-button').css('display', 'inline-block');
+        $('#auth-status').html('You are currently signed in and have granted ' +
+            'access to this app.');
+    } else {
+        $('#sign-in-or-out-button').html('Sign In/Authorize');
+        $('#revoke-access-button').css('display', 'none');
+        $('#auth-status').html('You have not authorized this app or you are ' +
+            'signed out.');
+    }
+}
+function handleAuthClick() {
+    if (GoogleAuth.isSignedIn.get()) {
+        // User is authorized and has clicked 'Sign out' button.
+        GoogleAuth.signOut();
+    } else {
+        // User is not signed in. Start Google auth flow.
+        GoogleAuth.signIn();
+    }
+}
+function initClient() {
+    // Retrieve the discovery document for version 3 of Google Drive API.
+    // In practice, your app can retrieve one or more discovery documents.
+    var discoveryUrl = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 
-(async() => {
+    // Initialize the gapi.client object, which app uses to make API requests.
+    // Get API key and client ID from API Console.
+    // 'scope' field specifies space-delimited list of access scopes.
+    gapi.client.init({
+        'apiKey': 'AIzaSyAwbi2eq4pdJ9LQa_4pFS0b2oJgQPPqGTk',
+        'discoveryDocs': [discoveryUrl],
+        'clientId': '768887778201-2kdkhj80u59bkpp4ojds700oss077nfi.apps.googleusercontent.com',
+        'scope': SCOPE
+    }).then(function () {
+        GoogleAuth = gapi.auth2.getAuthInstance();
+
+        // Listen for sign-in state changes.
+        GoogleAuth.isSignedIn.listen(updateSigninStatus);
+
+        // Handle initial sign-in state. (Determine if user is already signed in.)
+        var user = GoogleAuth.currentUser.get();
+        setSigninStatus();
+
+        // Call handleAuthClick function when user clicks on
+        //      "Sign In/Authorize" button.
+        $('#sign-in-or-out-button').click(function () {
+            handleAuthClick();
+        });
+        $('#revoke-access-button').click(function () {
+            revokeAccess();
+        });
+        $('#getApi').click(function () {
+            // var request = gapi.client.request({
+            //     'method': 'POST',
+            //     'path': '/drive/v3/files/1x2ZLBak5OCI8ImisyGI-Lh2GS3xBBYZW8fOK_xOVqzA',
+            //     'params': {'fields': 'user'}
+            // });
+            // // Execute the API request.
+            // request.execute(function(response) {
+            //     console.log(response);
+            // });
+            createFile('test.json').then(item => { console.log(itme) })
+        });
+    });
+}
+
+(async () => {
+    await handleClientLoad();
     await insert_main()
     await checkInsertVueIdDone();
 
@@ -43,24 +124,24 @@ function formatTime(time) {
         getTimeKeyLessOrThanCurrentTme(noteObj, lessOrThan) {
             currentTime = this.getCurrentTime()
             let allNoteTime = Object.keys(noteObj)
-            .map(item => parseInt(item))
+                .map(item => parseInt(item))
             if (allNoteTime.length === 0) {
                 return null
             }
             let ret = ''
-            switch (lessOrThan){
+            switch (lessOrThan) {
                 case 'less':
                     ret = Math
-                    .max(...allNoteTime 
-                        .filter(item => item <= currentTime))
+                        .max(...allNoteTime
+                            .filter(item => item <= currentTime))
                     break
                 case 'than':
                     ret = Math
-                    .min(...allNoteTime 
-                        .filter(item => item > currentTime))
+                        .min(...allNoteTime
+                            .filter(item => item > currentTime))
                     break
             }
-            if (ret === -Infinity || ret === Infinity){
+            if (ret === -Infinity || ret === Infinity) {
                 ret = currentTime
             }
             return ret.toString()
@@ -75,28 +156,33 @@ function formatTime(time) {
             currentKey: 1,
             noteCache: '',
             videoId: ''
-            },
+        },
         mutations: {
-            updateCurrentNoteObj (state, note) {
+            updateCurrentNoteObj(state, note) {
+                console.log(1)
                 state.noteObj[state.markDataInjectKey] = note
                 console.log(state.noteObj)
             },
-            updateNoteObjByKey (state, payload) {
+            updateNoteObjByKey(state, payload) {
+                console.log(2)
                 state.markDataInjectKey = payload["key"]
                 state.noteObj[payload["key"]] = payload["note"]
                 state.noteObjLength = Object.keys(state.noteObj).length
                 console.log(state.noteObj)
             },
-            updateMarkDataInjectKey (state, key) {
+            updateMarkDataInjectKey(state, key) {
+                console.log(3)
                 state.markDataInjectKey = key
                 console.log(state.noteObj)
             },
-            updateCurrentKey (state) {
+            updateCurrentKey(state) {
+                console.log(4)
                 let yutebeCurrentTime = ytController.getTimeKeyLessOrThanCurrentTme(state.noteObj, 'less')
                 state.currentKey = Object.keys(state.noteObj).indexOf(yutebeCurrentTime) + 1
                 console.log(state.noteObj)
             },
-            updateCurrentTimeOfNote (state) {
+            updateCurrentTimeOfNote(state) {
+                console.log(5)
                 let yutebeCurrentTime = formatTime(ytController.getCurrentTime())
                 const deleteKey = Object.entries(state.noteObj)
                     .filter(item => item[1] === state.noteCache)
@@ -105,15 +191,39 @@ function formatTime(time) {
                 delete state.noteObj[deleteKey[0][0]]
                 console.log(state.noteObj)
             },
-            updateNoteCache (state, note) {
+            updateNoteCache(state, note) {
+                console.log(6)
                 state.noteCache = note
                 console.log(state.noteObj)
             },
-            updateVideoId (state, videoId) {
+            updateVideoId(state, videoId) {
+                const resetObj = () => {
+                    Object.keys(state.noteObj)
+                        .forEach(key => {
+                            delete state.noteObj[key]
+                        })
+                    state.noteCache = ''
+                    state.currentKey = 1
+                }
                 state.videoId = videoId
+                const data = {
+                    type: 'updateTitleAndGetNoteContent',
+                    data: {
+                        videoId: videoId
+                    }
+                }
+                resetObj()
+                chrome.runtime.sendMessage(data, function(response) {
+                    Object.keys(response)
+                    .forEach(key => {
+                        state.noteObj[key] = response[key]
+                    })
+                    state.noteObjLength = Object.keys(state.noteObj).length
+                });
                 console.log(`updateVideoId: Save video id ${state.videoId}`)
             },
-            deleteNoteByKey (state, key) {
+            deleteNoteByKey(state, key) {
+                console.log(7)
                 let allNoteKeys = Object.keys(state.noteObj)
                 let preNoteKey = allNoteKeys[allNoteKeys.indexOf(key) - 1]
                 state.markDataInjectKey = preNoteKey
@@ -148,7 +258,7 @@ function formatTime(time) {
             rendenMarkdownToHtml() {
                 let md = window.markdownit();
                 let lastNote = this.$store.state.noteObj[this.$store.state.markDataInjectKey]
-                if (typeof lastNote === 'string'){
+                if (typeof lastNote === 'string') {
                     let html = md.render(lastNote);
                     this.output = html
                 } else if (lastNote === undefined) {
@@ -158,21 +268,19 @@ function formatTime(time) {
             },
         }
     };
-    
+
     let editComponent = {
-        template: `
-        <mu-text-field v-model="note" multi-line :rows="21" full-width class="textarea"></mu-text-field><br/>
-        `,
+        template: `<mu-text-field v-model="note" multi-line :rows="21" full-width class="textarea"></mu-text-field><br/>`,
         data() {
             return {
             }
         },
         computed: {
             note: {
-                get () {
+                get() {
                     return this.$store.state.noteCache
                 },
-                set (note) {
+                set(note) {
                     // this.noteCache = this.$store.state.noteObj[this.$store.state.markDataInjectKey]
                     this.$store.commit('updateNoteCache', note)
                     this.$store.commit('updateCurrentNoteObj', note)
@@ -230,7 +338,7 @@ function formatTime(time) {
         },
         watch: {
             markData() {
-                if (this.markDataInjectKey !== null){
+                if (this.markDataInjectKey !== null) {
                     this.noteObj[this.markDataInjectKey] = this.markData
                 }
             },
@@ -252,7 +360,7 @@ function formatTime(time) {
                 this.$store.commit("updateVideoId", videoId)
             }
             init()
-            window.addEventListener("yt-navigate-finish", function(event) {
+            window.addEventListener("yt-navigate-finish", function (event) {
                 init()
             })
         },
@@ -263,7 +371,7 @@ function formatTime(time) {
                 if (this.checkIfTimeNotExistInNoteObj(this.$store.state.noteObj, yutebeCurrentTime)) {
                     this.selectMode = 1
                     ytController.pauseVideo()
-                    this.$store.commit("updateNoteObjByKey", {key: yutebeCurrentTime,note: ''})
+                    this.$store.commit("updateNoteObjByKey", { key: yutebeCurrentTime, note: '' })
                     this.$store.commit("updateMarkDataInjectKey", yutebeCurrentTime)
                     this.$store.commit("updateCurrentKey")
                     this.$store.commit('updateNoteCache', '')
@@ -291,28 +399,38 @@ function formatTime(time) {
             //     }
             // },
             saveNoteToCloud() {
-                var settings = {
-                    "async": true,
-                    "crossDomain": true,
-                    "url": "https://api.github.com/gists",
-                    "method": "POST",
-                    "headers": {
-                        "authorization": "token d7f903aa51819b31d0d57412dab8cb4be5cc6469",
-                        "content-type": "application/json"
-                    },
-                    "processData": false,
-                    "data": JSON.stringify({
-                        "description": "youtube-note-testing",
-                        "public": true,
-                        "files": {
-                            "test": {
-                                "content": JSON.stringify(this.$store.state.noteObj)
-                            }
-                        }
-                    })
+                // var settings = {
+                //     "async": true,
+                //     "crossDomain": true,
+                //     "url": "https://api.github.com/gists",
+                //     "method": "POST",
+                //     "headers": {
+                //         "authorization": "token d7f903aa51819b31d0d57412dab8cb4be5cc6469",
+                //         "content-type": "application/json"
+                //     },
+                //     "processData": false,
+                //     "data": JSON.stringify({
+                //         "description": "youtube-note-testing",
+                //         "public": true,
+                //         "files": {
+                //             "test": {
+                //                 "content": JSON.stringify(this.$store.state.noteObj)
+                //             }
+                //         }
+                //     })
+                // }
+                // $.ajax(settings).done(function (response) {
+                //     console.log(response);
+                // });
+                const data = {
+                    type: 'saveNote',
+                    data: {
+                        videoId: this.$store.state.videoId,
+                        noteObj: this.$store.state.noteObj,
+                    }
                 }
-                $.ajax(settings).done(function (response) {
-                    console.log(response);
+                chrome.runtime.sendMessage(data, function(response) {
+                    console.log('response', response);
                 });
             },
             paginationEvent() {
@@ -337,8 +455,8 @@ function formatTime(time) {
             },
             checkIfTimeNotExistInNoteObj(checkObject, time) {
                 return Object.keys(checkObject)
-                .filter(item => item === time.toString())
-                .length === 0
+                    .filter(item => item === time.toString())
+                    .length === 0
             },
         },
     });

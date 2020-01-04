@@ -8,6 +8,10 @@
         "default_icon" : "icon.png",
         "default_popup": "popup.html"
     },
+    "oauth2": {
+        "client_id": "768887778201-9uouvo24t5gcdup9qik89fteohklkr28.apps.googleusercontent.com",
+        "scopes":["https://www.googleapis.com/auth/spreadsheets"]
+    },
     "content_scripts" : [
         {
             "matches" : ["*://www.youtube.com/*"],
@@ -17,6 +21,7 @@
                 "scripts/jquery.min.js",
                 "scripts/markdown-it.min.js",
                 "scripts/muse-ui.js",
+                "scripts/googleApi.js",
                 "content.js"
             ],
 			"css" : ["content.css"],
@@ -25,15 +30,19 @@
         }
     ],
     "background": {
-        "scripts": ["background.js"]
-	},
+        "page": "background.html",
+        "persistent": false
+    },
 	"web_accessible_resources": [
 		"accessible.js"
 	],
     "permissions" : [
+        "identity",
         "tabs",
         "<all_urls>",
         "activeTab",
         "storage"
-    ]
+    ],
+    "content_security_policy": "script-src 'self' https://apis.google.com/; object-src 'self'",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo6s3T3xFpAqLLvmXEddfgOAYp4g1dfZom/b0RkQyGY9ZKp9FeSPN98hSD+5RfJK3WeYxFZgQXvyh3o6nkwXEJJMuSQWQjezMNvxz4pAKjmaOEy8r9YVXQR9s5MoHfRcRGOCZqTCCsN7JeQAAKaxg67VI3BUUZ6hkf1LMs0sb9ymOMLZdvLphWpByo/xICKQeguna1Aw3IXH855muKmelengnOg3H2IxjH9wpSJGeRAF73JjmIBfq4XO5QphrIQPmngWR3H+FOpiMgU4pNU60zBQiSbHxUVvbf4h++M84f/hV0nD7mbx1I0s8VrBoo6BTQb8NyRdB7PWgiyUMFqHpbQIDAQAB"
 }
